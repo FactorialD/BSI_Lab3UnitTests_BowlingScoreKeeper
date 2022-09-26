@@ -7,178 +7,180 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnitParamsRunner.class)
 public class FrameTest {
 
+    @Test
+    @Parameters(method = "parameters_to_testaddNewRoll")
+    public void testaddNewRoll(ArrayList<Integer> downedPills,  ArrayList<Integer> expectedScores, ArrayList<ArrayList<Integer>> expectedDownPills){
+        Frame f = new Frame();
+        f.addNewRoll(downedPills);
+        assertEquals(f.getScores(), expectedScores );
+        assertEquals(f.getDownPills(), expectedDownPills);
+    }
+    private Object[] parameters_to_testaddNewRoll() {
+        return new Object[]{
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,3,4,5)),                 new ArrayList<Integer>(Arrays.asList(5)),     new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1,2,3,4,5)                 ))))     },
+                new Object[]{new ArrayList<Integer>(Arrays.asList()),                          new ArrayList<Integer>(Arrays.asList(0)),     new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList()                          ))))     },
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10)),      new ArrayList<Integer>(Arrays.asList(10)),    new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)      ))))     },
+                new Object[]{new ArrayList<Integer>(Arrays.asList(8,9,10)),                    new ArrayList<Integer>(Arrays.asList(3)),     new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(8,9,10)                    ))))     }
 
-    @Test
-    @Parameters(method = "parameters_to_testgetFirstRollDownPills")
-    public void testgetFirstRollDownPills(boolean[] roll, int expectedScore, boolean isLastFrame){
-        Frame f = new Frame(roll, roll, roll, false);
-        assertEquals(expectedScore, f.getFirstRollDownPills());
-    }
-    @Test
-    @Parameters(method = "parameters_to_testgetFirstRollDownPills")
-    public void testgetSecondRollDownPills(boolean[] roll, int expectedScore, boolean isLastFrame){
-        Frame f = new Frame(roll, roll, roll, false);
-        assertEquals(expectedScore, f.getSecondRollDownPills());
-    }
-    @Test
-    @Parameters(method = "parameters_to_testgetFirstRollDownPills")
-    public void testgetThirdRollDownPills(boolean[] roll, int expectedScore, boolean isLastFrame){
-        Frame f = new Frame(roll, roll, roll, isLastFrame);
-        assertEquals(expectedScore, f.getThirdRollDownPills());
+        };
     }
     @Test(expected = IllegalArgumentException.class)
-    @Parameters(method = "parameters_to_testgetThirdRollDownPills_WhenNotLastFrame")
-    public void testgetThirdRollDownPills_WhenNotLastFrame(boolean[] roll, int expectedScore, boolean isLastFrame){
-        Frame f = new Frame(roll, roll, roll, isLastFrame);
-        assertEquals(expectedScore, f.getThirdRollDownPills());
+    @Parameters(method = "parameters_to_testaddNewRoll_whenWrongArgumentsNumber")
+    public void testaddNewRoll_whenWrongArgumentsNumber(ArrayList<Integer> downedPills,  ArrayList<Integer> expectedScores, ArrayList<ArrayList<Integer>> expectedDownPills){
+        Frame f = new Frame();
+        f.addNewRoll(downedPills);
+        assertEquals(expectedScores, f.getScores());
+        assertEquals(expectedDownPills, f.getDownPills());
     }
-    private Object[] parameters_to_testgetFirstRollDownPills() {
+    private Object[] parameters_to_testaddNewRoll_whenWrongArgumentsNumber() {
         return new Object[]{
-                new Object[]{new boolean[]{false,false,false,false,true,false,false,true,false,false}, 2, true},
-                new Object[]{new boolean[]{true,true,true,true,true,true,true,true,true,true}, 10, true},
-                new Object[]{new boolean[]{false,false,false,false,false,false,false,false,false,false}, 0, true},
-        };
-    }
-    private Object[] parameters_to_testgetThirdRollDownPills_WhenNotLastFrame() {
-        return new Object[]{
-                new Object[]{new boolean[]{false,false,false,false,false,false,false,false,false,false}, 0, false},
-                new Object[]{new boolean[]{false,false,false,false,true,false,false,true,false,false}, 2, false},
-                new Object[]{new boolean[]{true,true,true,true,true,true,true,true,true,true}, 10, false},
+                new Object[]{new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7,8,9,10,1,2)),                 new ArrayList<>(Arrays.asList(10)),      new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5))),  new ArrayList<>((Arrays.asList(6,7,8,9,10)))  )))     },
+                new Object[]{new ArrayList<>(Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)),                          new ArrayList<>(Arrays.asList(0)),      new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList()                          )))))     },
+                new Object[]{new ArrayList<>(Arrays.asList(11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12)),      new ArrayList<>(Arrays.asList(10)),     new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)      )))))     }
         };
     }
 
+    @Test
+    @Parameters(method = "parameters_to_testawaitsForFirstRoll")
+    public void testawaitsForFirstRoll(Frame frame, boolean expectedResult){
+        assertEquals( frame.awaitsForFirstRoll(), expectedResult);
+
+    }
+    private Object[] parameters_to_testawaitsForFirstRoll() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList()));
+
+        ArrayList<ArrayList<Integer>> b1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1, 2, 3, 4, 6, 7, 10)   )))));
+        ArrayList<ArrayList<Integer>> b2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1, 2, 4, 6, 7, 10)))  , new ArrayList<Integer>((Arrays.asList(8, 9)))      )));
+
+        return new Object[]{
+                new Object[]{   new Frame( a1 ),    true},
+
+                new Object[]{   new Frame( b1 ),   false},
+                new Object[]{   new Frame( b2 ),   false}
+        };
+    }
+
+    @Test
+    @Parameters(method = "parameters_to_testawaitsForLastRoll")
+    public void testawaitsForLastRoll(Frame frame, boolean expectedResult){
+        assertEquals( frame.awaitsForLastRoll(), expectedResult);
+    }
+    private Object[] parameters_to_testawaitsForLastRoll() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10))))      ));
+
+        ArrayList<ArrayList<Integer>> b1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1, 2, 3, 4,5, 6, 7, 8, 9, 10)   )))));
+        ArrayList<ArrayList<Integer>> b2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1, 2, 4, 6, 7, 10)))  , new ArrayList<Integer>((Arrays.asList(8, 9)))      )));
+
+        return new Object[]{
+                new Object[]{   new Frame( a1 ),    true},
+
+                new Object[]{   new Frame( b1 ),   false},
+                new Object[]{   new Frame( b2 ),   false}
+        };
+    }
+
+    @Test
+    @Parameters(method = "parameters_to_testawaitsForRoll")
+    public void testawaitsForRoll(Frame frame, boolean expectedResult){
+        assertEquals( frame.awaitsForRoll(), expectedResult);
+    }
+    private Object[] parameters_to_testawaitsForRoll() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10))))      ));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList()));
+
+        ArrayList<ArrayList<Integer>> b1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1, 2, 3, 4, 5,6, 7, 8, 9, 10)   )))));
+        ArrayList<ArrayList<Integer>> b2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1, 2, 4, 6, 7, 10)))  , new ArrayList<Integer>((Arrays.asList(8, 9)))      )));
+        ArrayList<ArrayList<Integer>> b4 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<Integer>((Arrays.asList(1, 2, 4, 6, 7, 10)))  , new ArrayList<Integer>((Arrays.asList(8, 9)))      )));
+
+        return new Object[]{
+                new Object[]{   new Frame( a1 ),    true},
+                new Object[]{   new Frame( a2 ),    true},
+
+                new Object[]{   new Frame( b1 ),   false},
+                new Object[]{   new Frame( b2 ),   false},
+                new Object[]{   new Frame( b4 ),   false}
+        };
+    }
+
+
+    @Test
+    @Parameters(method = "parameters_to_testgetAllDownedPills")
+    public void testgetAllDownedPills(Frame frame, ArrayList<Integer> expectedDownedPills){
+        assertEquals( frame.getAllDownedPills().containsAll( expectedDownedPills), true );
+    }
+    private Object[] parameters_to_testgetAllDownedPills() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))       )));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))     )));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5))),       new ArrayList<>((Arrays.asList(6,7,8,9,10)))                )));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(2,4,6,8))),                new ArrayList<>((Arrays.asList(1,3,5,9,10)))         )));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))      )));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))            )));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList()))                          )));
+
+        return new Object[]{
+                new Object[]{   new Frame( a1 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,9,10))},
+                new Object[]{   new Frame( a2 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10))},
+                new Object[]{   new Frame( a3 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10))},
+                new Object[]{   new Frame( a4 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,8,9,10))},
+                new Object[]{   new Frame( a5 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10))},
+                new Object[]{   new Frame( a6 ),   new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,9,10))},
+                new Object[]{   new Frame( a7 ),   new ArrayList<Integer>(Arrays.asList())},
+        };
+    }
 
     @Test
     @Parameters(method = "parameters_to_testisStrike")
-    public void testisStrike(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isStrike());
+    public void testisStrike(Frame frame, boolean expectedResult){
+        assertEquals( frame.isStrike(), expectedResult);
     }
     private Object[] parameters_to_testisStrike() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))       )));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))     )));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5))),       new ArrayList<>((Arrays.asList(6,7,8,9,10)))                )));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(2,4,6,8))),                new ArrayList<>((Arrays.asList(1,3,5,9,10)))         )));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))      )));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))            )));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList()))                          )));
+        ArrayList<ArrayList<Integer>> a8 = new ArrayList<>(new ArrayList<>(Arrays.asList()));
         return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false), false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,true,false,false,false,false,false},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, true), true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false), false}
+                new Object[]{   new Frame( a1 ),   false},
+                new Object[]{   new Frame( a2 ),   true},
+                new Object[]{   new Frame( a3 ),   false},
+                new Object[]{   new Frame( a4 ),   false},
+                new Object[]{   new Frame( a5 ),   false},
+                new Object[]{   new Frame( a6 ),   false},
+                new Object[]{   new Frame( a7 ),   false},
+                new Object[]{   new Frame( a8 ),   false}
         };
     }
 
     @Test
     @Parameters(method = "parameters_to_testisSpare")
-    public void testisSpare(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isSpare());
+    public void testisSpare(Frame frame, boolean expectedResult){
+        assertEquals( frame.isSpare(), expectedResult);
     }
     private Object[] parameters_to_testisSpare() {
-        return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false), false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false), false},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, false), true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, true), false}
-        };
-    }
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))       )));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))     )));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5))),       new ArrayList<>((Arrays.asList(6,7,8,9,10)))                )));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(2,4,6,8))),                new ArrayList<>((Arrays.asList(1,3,5,9,10)))         )));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))      )));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))            )));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList()))                          )));
 
-    @Test
-    @Parameters(method = "parameters_to_isSecondStrike")
-    public void isSecondStrike(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isSecondStrike());
-    }
-    private Object[] parameters_to_isSecondStrike() {
         return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, true),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, true),
-                        true},
-        };
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    @Parameters(method = "parameters_to_isSecondStrike_WhenNotLastFrame")
-    public void isSecondStrike_WhenNotLastFrame(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isSecondStrike());
-    }
-    private Object[] parameters_to_isSecondStrike_WhenNotLastFrame() {
-        return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, false),
-                        true},
-        };
-    }
-
-    @Test
-    @Parameters(method = "parameters_to_isThirdStrike")
-    public void isThirdStrike(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isThirdStrike());
-    }
-    private Object[] parameters_to_isThirdStrike() {
-        return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, true),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},true),
-                        false},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-        };
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    @Parameters(method = "parameters_to_isThirdStrike_WhenNotLastFrame")
-    public void isThirdStrike_WhenNotLastFrame(Frame frame, boolean expectedStrike){
-        assertEquals(expectedStrike, frame.isThirdStrike());
-    }
-    private Object[] parameters_to_isThirdStrike_WhenNotLastFrame() {
-        return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false}, false),
-                        true},
+                new Object[]{   new Frame( a1 ),   false},
+                new Object[]{   new Frame( a2 ),   false},
+                new Object[]{   new Frame( a3 ),   true},
+                new Object[]{   new Frame( a4 ),   false},
+                new Object[]{   new Frame( a5 ),   true},
+                new Object[]{   new Frame( a6 ),   false},
+                new Object[]{   new Frame( a7 ),   false}
         };
     }
 
@@ -188,443 +190,233 @@ public class FrameTest {
         assertEquals(expectedSplit, frame.isSplit());
     }
     private Object[] parameters_to_testisSplit() {
+
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(7, 10)                  ) )))));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(7, 9)                   ) )))));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(8, 10)                  ) )))));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(5, 7)                   ) )))));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(5, 10)                  ) )))));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(5, 7, 10)               ) )))));
+        ArrayList<ArrayList<Integer>> a8 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3, 7)                   ) )))));
+        ArrayList<ArrayList<Integer>> a9 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 10)                  ) )))));
+        ArrayList<ArrayList<Integer>> a0 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 7)                   ) )))));
+        ArrayList<ArrayList<Integer>> aa = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3, 10)                  ) )))));
+        ArrayList<ArrayList<Integer>> ab = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 7, 10)               ) )))));
+        ArrayList<ArrayList<Integer>> ac = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3, 7, 10)               ) )))));
+        ArrayList<ArrayList<Integer>> ad = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(4, 7, 10)               ) )))));
+        ArrayList<ArrayList<Integer>> ae = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(6, 7, 10)               ) )))));
+        ArrayList<ArrayList<Integer>> af = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(4, 6, 7, 10)            ) )))));
+        ArrayList<ArrayList<Integer>> ag = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(4, 6, 7, 8, 10)         ) )))));
+        ArrayList<ArrayList<Integer>> ah = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(4, 6, 7, 9, 10)         ) )))));
+        ArrayList<ArrayList<Integer>> ai = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3, 4, 6, 7, 10)         ) )))));
+        ArrayList<ArrayList<Integer>> aj = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 4, 6, 7, 10)         ) )))));
+        ArrayList<ArrayList<Integer>> ak = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 4, 6, 7, 8, 10)      ) )))));
+        ArrayList<ArrayList<Integer>> al = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3, 4, 6, 7, 9, 10)      ) )))));
+
+        ArrayList<ArrayList<Integer>> b1 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1, 2, 3, 4, 6, 7, 10)   ) )))));
+        ArrayList<ArrayList<Integer>> b2 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1, 2, 4, 6, 7, 10)      ) )))));
+        ArrayList<ArrayList<Integer>> b3 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1, 2, 4, 6, 7, 8, 10)   ) )))));
+        ArrayList<ArrayList<Integer>> b4 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1, 3, 4, 6, 7, 9, 10)   ) )))));
+        ArrayList<ArrayList<Integer>> b5 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2, 3, 4,5, 6, 7,8, 9, 10)   ) )))));
+
         return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false),
-                        false},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,false,true,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,false,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,false,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,false,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,false,true,true,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,false,true,true,true,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,false,true,true,true,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,false,true,true,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,false,true,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,false,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,false,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,false,true,false,false,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,true,false,true,false,false,true,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,false,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,false,true,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,false,true,false,true,false,false,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{true,true,false,false,true,false,false,true,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true}
-        };
+                new Object[]{   new Frame( a2 ),    true},
+                new Object[]{   new Frame( a3 ),    true},
+                new Object[]{   new Frame( a4 ),    true},
+                new Object[]{   new Frame( a5 ),    true},
+                new Object[]{   new Frame( a6 ),    true},
+                new Object[]{   new Frame( a7 ),    true},
+                new Object[]{   new Frame( a8 ),    true},
+                new Object[]{   new Frame( a9 ),    true},
+                new Object[]{   new Frame( a0 ),    true},
+                new Object[]{   new Frame( aa ),    true},
+                new Object[]{   new Frame( ab ),    true},
+                new Object[]{   new Frame( ac ),    true},
+                new Object[]{   new Frame( ad ),    true},
+                new Object[]{   new Frame( ae ),    true},
+                new Object[]{   new Frame( af ),    true},
+                new Object[]{   new Frame( ag ),    true},
+                new Object[]{   new Frame( ah ),    true},
+                new Object[]{   new Frame( ai ),    true},
+                new Object[]{   new Frame( aj ),    true},
+                new Object[]{   new Frame( ak ),    true},
+                new Object[]{   new Frame( al ),    true},
 
-    }
-
-    @Test(expected =  IllegalArgumentException.class)
-    @Parameters(method = "parameters_to_testisSplit_WhenLastFrame")
-    public void testisSplit_WhenLastFrame(Frame frame, boolean expectedSplit){
-        assertEquals(expectedSplit, frame.isSplit());
-    }
-    private Object[] parameters_to_testisSplit_WhenLastFrame() {
-        return new Object[]{
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, true),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},true),
-                        false},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        false},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,true,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,false,false,true,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,true,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,false,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,true,false,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,false,false,false,true,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,false,false,false,false,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,false,false,false,true,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,false,false,false,false,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,false,false,false,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,false,false,false,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,true,false,false,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,false,false,true,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,true,false,true,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,true,false,true,true,true,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,false,true,false,true,true,false,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,true,false,true,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,true,false,true,true,false,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,true,false,true,true,true,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,true,false,true,true,false,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, true),
-                        true},
-        };
-
-    }
-
-    @Test
-    @Parameters(method = "parameters_to_testgetNumbersOfDownPills")
-    public void testgetNumbersOfDownPills(boolean[] roll, ArrayList<Integer>expectedResult){
-        assertEquals(expectedResult, Frame.getNumbersOfDownPills(roll));
-
-    }
-    private Object[] parameters_to_testgetNumbersOfDownPills() {
-        return new Object[]{
-                new Object[]{ new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(5,8))
-                },
-                new Object[]{ new boolean[]{true,false,true,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(1,3,5,8))
-                },
-                new Object[]{ new boolean[]{false,false,true,false,true,false,false,true,true,false},
-                        new ArrayList<Integer>(Arrays.asList(3,5,8,9))
-                },
-                new Object[]{ new boolean[]{false,true,false,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(2,5,8))
-                },
-                new Object[]{ new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10))
-                },
-                new Object[]{new boolean[]{false, false, false, false, false, false, false, false, false, false},
-                        new ArrayList<Integer>()
-                }
+                new Object[]{   new Frame( b1 ),   false},
+                new Object[]{   new Frame( b2 ),   false},
+                new Object[]{   new Frame( b3 ),   false},
+                new Object[]{   new Frame( b4 ),   false},
+                new Object[]{   new Frame( b5 ),   false}
 
         };
 
     }
-
-    @Test
-    @Parameters(method = "parameters_to_testgetNumbersOfLeavedPills")
-    public void testgetNumbersOfLeavedPills(boolean[] roll, ArrayList<Integer>expectedResult){
-        assertEquals(expectedResult, Frame.getNumbersOfLeavedPills(roll));
-
-    }
-    private Object[] parameters_to_testgetNumbersOfLeavedPills() {
-        return new Object[]{
-                new Object[]{ new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(1,2,3,4,6,7,9,10))
-                },
-                new Object[]{ new boolean[]{true,false,true,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(2,4,6,7,9,10))
-                },
-                new Object[]{ new boolean[]{false,false,true,false,true,false,false,true,true,false},
-                        new ArrayList<Integer>(Arrays.asList(1,2,4,6,7,10))
-                },
-                new Object[]{ new boolean[]{false,true,false,false,true,false,false,true,false,false},
-                        new ArrayList<Integer>(Arrays.asList(1,3,4,6,7,9,10))
-                },
-                new Object[]{ new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new ArrayList<Integer>()
-                },
-                new Object[]{new boolean[]{false, false, false, false, false, false, false, false, false, false},
-                        new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9,10))
-                }
-
-
-
-
-
-        };
-
-    }
-
 
     @Test
     @Parameters(method = "parameters_to_testisWashout")
     public void testisWashout(Frame frame, boolean expectedSplit){
-        assertEquals(expectedSplit, frame.isWashout());
+        assertEquals(frame.isWashout(), expectedSplit);
     }
     private Object[] parameters_to_testisWashout() {
+
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,7,10)         )  )))));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,7,9)          )  )))));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,8,10)         )  )))));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,5,7)          )  )))));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,5,10)         )  )))));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,5,7,10)       )  )))));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,3,7)          )  )))));
+        ArrayList<ArrayList<Integer>> a8 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,10)         )  )))));
+        ArrayList<ArrayList<Integer>> a9 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,7)          )  )))));
+        ArrayList<ArrayList<Integer>> a0 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,3,10)         )  )))));
+        ArrayList<ArrayList<Integer>> aa = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,7,10)       )  )))));
+        ArrayList<ArrayList<Integer>> ab = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,3,7,10)       )  )))));
+        ArrayList<ArrayList<Integer>> ac = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,4,7,10)       )  )))));
+        ArrayList<ArrayList<Integer>> ad = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,6,7,10)       )  )))));
+        ArrayList<ArrayList<Integer>> ae = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,4,6,7,10)     )  )))));
+        ArrayList<ArrayList<Integer>> af = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,4,6,7,8,10)   )  )))));
+        ArrayList<ArrayList<Integer>> ag = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,4,6,7,9,10)   )  )))));
+        ArrayList<ArrayList<Integer>> ah = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,3,4,6,7,10)   )  )))));
+        ArrayList<ArrayList<Integer>> ai = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,4,6,7,10)   )  )))));
+        ArrayList<ArrayList<Integer>> aj = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,4,6,7,8,10) )  )))));
+        ArrayList<ArrayList<Integer>> ak = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,3,4,6,7,9,10) )  )))));
+
+        ArrayList<ArrayList<Integer>> b1 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2,4,6,7,10)     )  )))));
+        ArrayList<ArrayList<Integer>> b2 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(2,4,6,7,8,10)   )  )))));
+        ArrayList<ArrayList<Integer>> b3 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(3,4,6,7,9,10)   )  )))));
+        ArrayList<ArrayList<Integer>> b4 = new ArrayList<>(new ArrayList<>(Arrays.asList(Frame.getLeavedPillsForFirstRoll(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,9,10)   )  )))));
+
         return new Object[]{
-                new Object[]{new Frame(new boolean[]{true,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false},
-                        new boolean[]{false,false,false,false,true,false,false,true,false,false}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{false,false,false,false,false,false,false,false,false,false},false),
-                        false},
-                new Object[]{new Frame(new boolean[]{true,false,false,false,false,false,false,false,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        false},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,true,true,false,true,false,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,true,true,true,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,false,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,false,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,false,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,true,true,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,true,true,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,true,true,true,false,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,true,true,true,true,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,true,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,false,true,true,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,true,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,false,true,false,false,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,true,false,true,false,false,true,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,false,true,false,false,true,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,false,true,false,true,false,false,false,true,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true},
-                new Object[]{new Frame(new boolean[]{false,true,false,false,true,false,false,true,false,false},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true},
-                        new boolean[]{true,true,true,true,true,true,true,true,true,true}, false),
-                        true}
+                new Object[]{   new Frame( a1 ),    true},
+                new Object[]{   new Frame( a2 ),    true},
+                new Object[]{   new Frame( a3 ),    true},
+                new Object[]{   new Frame( a4 ),    true},
+                new Object[]{   new Frame( a5 ),    true},
+                new Object[]{   new Frame( a6 ),    true},
+                new Object[]{   new Frame( a7 ),    true},
+                new Object[]{   new Frame( a8 ),    true},
+                new Object[]{   new Frame( a9 ),    true},
+                new Object[]{   new Frame( a0 ),    true},
+                new Object[]{   new Frame( aa ),    true},
+                new Object[]{   new Frame( ab ),    true},
+                new Object[]{   new Frame( ac ),    true},
+                new Object[]{   new Frame( ad ),    true},
+                new Object[]{   new Frame( ae ),    true},
+                new Object[]{   new Frame( af ),    true},
+                new Object[]{   new Frame( ag ),    true},
+                new Object[]{   new Frame( ah ),    true},
+                new Object[]{   new Frame( ai ),    true},
+                new Object[]{   new Frame( aj ),    true},
+                new Object[]{   new Frame( ak ),    true},
+
+                new Object[]{   new Frame( b1 ),   false},
+                new Object[]{   new Frame( b2 ),   false},
+                new Object[]{   new Frame( b3 ),   false},
+                new Object[]{   new Frame( b4 ),   false}
+
+        };
+    }
+
+
+    @Test
+    @Parameters(method = "parameters_to_testgetLeavedPillsForFirstRoll")
+    public void testgetLeavedPillsForFirstRoll(Frame frame, ArrayList<Integer> expectedLeavedPills){
+        assertEquals(expectedLeavedPills, Frame.getLeavedPillsForFirstRoll(frame.getDownPills().get(0)));
+    }
+    private Object[] parameters_to_testgetLeavedPillsForFirstRoll() {
+        ArrayList<ArrayList<Integer>> a1 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))       )));
+        ArrayList<ArrayList<Integer>> a2 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))     )));
+        ArrayList<ArrayList<Integer>> a3 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(1,2,3,4,5))),       new ArrayList<>((Arrays.asList(6,7,8,9,10)))                )));
+        ArrayList<ArrayList<Integer>> a4 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList(2,4,6,8))),                new ArrayList<>((Arrays.asList(1,3,5,9,10)))         )));
+        ArrayList<ArrayList<Integer>> a5 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))      )));
+        ArrayList<ArrayList<Integer>> a6 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList(1,2,3,4,5,9,10)))            )));
+        ArrayList<ArrayList<Integer>> a7 = new ArrayList<>(new ArrayList<>(Arrays.asList(new ArrayList<>((Arrays.asList())),                new ArrayList<>((Arrays.asList()))                          )));
+
+        return new Object[]{
+                new Object[]{   new Frame( a1 ),   new ArrayList<>((Arrays.asList(6,7,8)))},
+                new Object[]{   new Frame( a2 ),   new ArrayList<>((Arrays.asList()))},
+                new Object[]{   new Frame( a3 ),   new ArrayList<>((Arrays.asList(6,7,8,9,10)))},
+                new Object[]{   new Frame( a4 ),   new ArrayList<>((Arrays.asList(1,3,5,7,9,10)))},
+                new Object[]{   new Frame( a5 ),   new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))},
+                new Object[]{   new Frame( a6 ),   new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))},
+                new Object[]{   new Frame( a7 ),   new ArrayList<>((Arrays.asList(1,2,3,4,5,6,7,8,9,10)))}
+        };
+
+    }
+
+
+    @Test
+    @Parameters(method = "parameters_to_testisSplitCombination")
+    public void testisSplitCombination(ArrayList<Integer> leavedPillsForFirstRoll, boolean expectedSplit){
+        assertEquals(expectedSplit, Frame.isSplitCombination(leavedPillsForFirstRoll));
+    }
+    private Object[] parameters_to_testisSplitCombination() {
+        return new Object[]{
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(7,10))),                 true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(7,9))),                  true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(8,10))),                 true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(5,7))),                  true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(5,10))),                 true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(5,7,10))),               true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(3,7))),                  true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(2,10))),                 true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(2,7))),                  true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(3,10))),                 true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(2,7,10))),               true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(3,7,10))),               true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(4,7,10))),               true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(6,7,10))),               true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(4,6,7,10))),             true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(4,6,7,8,10))),           true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(4,6,7,9,10))),           true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(3,4,6,7,10))),           true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(2,4,6,7,10))),           true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(2,4,6,7,8,10))),         true},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(3,4,6,7,9,10))),         true},
+
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(1,2,3,4,6,7,10))),      false},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(1,2,4,6,7,10))),        false},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(1,2,4,6,7,8,10))),      false},
+                new Object[]{(new ArrayList<Integer>(Arrays.asList(1,3,4,6,7,9,10))),      false}
         };
 
     }
 
     @Test
-    @Parameters(method = "parameters_to_testsetFirstSecondThirdRoll")
-    public void testsetFirstSecondThirdRoll(ArrayList<Integer> downedPills, boolean []expectedRoll){
-        Frame f = new Frame();
-        f.setFirstRoll(downedPills);
-        f.setSecondRoll(downedPills);
-        f.setThirdRoll(downedPills);
-        assertArrayEquals(expectedRoll, f.getFirstRoll());
-        assertArrayEquals(expectedRoll, f.getSecondRoll());
-        assertArrayEquals(expectedRoll, f.getThirdRoll());
+    @Parameters(method = "parameters_to_testisWashoutCombination")
+    public void testisWashoutCombination(ArrayList<Integer> leavedPillsForFirstRoll, boolean expectedSplit){
+        assertEquals(expectedSplit, Frame.isWashoutCombination(leavedPillsForFirstRoll));
     }
-    private Object[] parameters_to_testsetFirstSecondThirdRoll() {
+    private Object[] parameters_to_testisWashoutCombination() {
         return new Object[]{
-                new Object[]{
-                        new ArrayList<Integer>(Arrays.asList(1, 3, 5, 6, 7, 9)),
-                        new boolean[]{true, false, true, false, true, true, true, false, true, false}
-                },
-                new Object[]{
-                        new ArrayList<Integer>(Arrays.asList(1, 4, 5, 7, 8, 10)),
-                        new boolean[]{true, false, false, true, true, false, true , true, false, true}
-                }
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,7,10))        ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,7,9))         ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,8,10))        ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,5,7))         ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,5,10))        ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,5,7,10))      ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,3,7))         ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,10))        ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,7))         ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,3,10))        ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,7,10))      ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,3,7,10))      ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,4,7,10))      ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,6,7,10))      ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,4,6,7,10))    ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,4,6,7,8,10))  ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,4,6,7,9,10))  ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,3,4,6,7,10))  ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,4,6,7,10))  ,      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,2,4,6,7,8,10)),      true},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(1,3,4,6,7,9,10)),      true},
 
+                new Object[]{new ArrayList<Integer>(Arrays.asList(2,3,4,6,7,10)),     false},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(2,4,6,7,10)),       false},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(2,4,6,7,8,10)),     false},
+                new Object[]{new ArrayList<Integer>(Arrays.asList(3,4,6,7,9,10)),     false}
         };
 
     }
-    @Test(expected = IllegalArgumentException.class)
-    @Parameters(method = "parameters_to_testsetFirstSecondThirdRoll_WhenWrongNumberPill")
-    public void testsetFirstSecondThirdRoll_WhenWrongNumberPill(ArrayList<Integer> downedPills, boolean []expectedRoll){
-        Frame f = new Frame();
-        f.setFirstRoll(downedPills);
-        f.setSecondRoll(downedPills);
-        f.setThirdRoll(downedPills);
-        assertEquals(expectedRoll,(f.getFirstRoll()));
-        assertEquals(expectedRoll,(f.getSecondRoll()));
-        assertEquals(expectedRoll,(f.getThirdRoll()));
-    }
-    private Object[] parameters_to_testsetFirstSecondThirdRoll_WhenWrongNumberPill() {
-        return new Object[]{
-                new Object[]{
-                        new ArrayList<Integer>(Arrays.asList(0, 3, 5, 6, 7, 10)),
-                        new boolean[]{true, false, true, false, true, true, true, false, true, false},
 
-                },
-                new Object[]{
-                        new ArrayList<Integer>(Arrays.asList(1, 4, 5, 7, 8, 11)),
-                        new boolean[]{true, false, false, true, true, false, true , true, false, true},
-
-                },
-                new Object[]{
-                        new ArrayList<Integer>(Arrays.asList(-40, 22, 5, 7, 8, 11)),
-                        new boolean[]{true, false, false, true, true, false, true , true, false, true},
-
-                }
-
-        };
-
-    }
 }

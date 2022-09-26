@@ -1,314 +1,175 @@
 package Models;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
+@Data
+public class Frame{
 
-public class Frame {
+    private ArrayList<Integer> scores;
+    private ArrayList<ArrayList<Integer>> downPills;
 
-    private boolean isLastFrame = false;
-
-    private boolean[] firstRoll;
-    private boolean[] secondRoll;
-    private boolean[] thirdRoll;
-
-
-    private Roll rollState = Roll.BEFORE_FIRST_ROLL;
-
-    public Frame(boolean forTest) {
-        firstRoll = new boolean[10];
-        secondRoll = new boolean[10];
-        thirdRoll = new boolean[10];
-    }
-
-    public Frame(){
-        firstRoll = null;
-        secondRoll = null;
-        thirdRoll = null;
-    }
-
-    public Frame(boolean[] firstRoll, boolean[] secondRoll, boolean[] thirdRoll, boolean isLastFrame) {
-        this.firstRoll = firstRoll;
-        this.secondRoll = secondRoll;
-        this.thirdRoll = thirdRoll;
-        this.isLastFrame = isLastFrame;
-    }
-
-    public void setFirstRoll(ArrayList<Integer> downPills) {
-        if(rollState != Roll.BEFORE_FIRST_ROLL){
-            throw new IllegalArgumentException();
-        }
-        boolean[] roll = new boolean[10];
-        for (int a:downPills
-             ) {
-            if(a > 10 || a < 1){
-                throw new IllegalArgumentException();
-            }
-            roll[a-1] = true;
-        }
-        this.firstRoll = roll;
-        if(this.isStrike()){
-            rollState = Roll.DONE;
-        }
-        else{
-            rollState = Roll.BEFORE_SECOND_ROLL;
+    public Frame(ArrayList<ArrayList<Integer>> downPills) {
+        scores = new ArrayList<>();
+        this.downPills = new ArrayList<>();
+        for (ArrayList<Integer> downedPillForFrame: downPills) {
+            addNewRoll(downedPillForFrame);
         }
     }
-    public void setSecondRoll(ArrayList<Integer> downPills) {
-        if(rollState != Roll.BEFORE_SECOND_ROLL){
-            throw new IllegalArgumentException();
-        }
-        boolean[] roll = new boolean[10];
-        for (int a:downPills
-        ) {
-            if(a > 10 || a < 1){
-                throw new IllegalArgumentException();
-            }
-            roll[a-1] = true;
-        }
-        this.secondRoll = roll;
-        if(this.isLastFrame){
-            rollState = Roll.BEFORE_THIRD_ROLL;
-        }
-        else{
-            rollState = Roll.DONE;
-        }
-    }
-    public void setThirdRoll(ArrayList<Integer> downPills) {
-        if(rollState != Roll.BEFORE_THIRD_ROLL){
-            throw new IllegalArgumentException();
-        }
-        boolean[] roll = new boolean[10];
-        for (int a:downPills) {
-            if(a > 10 || a < 1){
-                throw new IllegalArgumentException();
-            }
-            roll[a-1] = true;
-        }
-        this.thirdRoll = roll;
-        rollState = Roll.DONE;
+
+    public Frame() {
+        this.scores = new ArrayList<>();
+        this.downPills = new ArrayList<>();
     }
 
-    public int getFirstRollDownPills(){
-        int count = 0;
-        for (int i = 0; i < 10; i++) {
-            if(firstRoll[i]){
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public int getSecondRollDownPills(){
-        int count = 0;
-        for (int i = 0; i < 10; i++) {
-            if(secondRoll[i]){
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public int getThirdRollDownPills(){
-        if(!isLastFrame){
+    public void addNewRoll(ArrayList<Integer> downedPills){
+        if(downedPills.size() > 10){
             throw new IllegalArgumentException();
         }else{
-            int count = 0;
-            for (int i = 0; i < 10; i++) {
-                if(thirdRoll[i]){
-                    count++;
-                }
-            }
-            return count;
+            downPills.add(downedPills);
+            scores.add(downedPills.size());
+        }
+    }
+
+    public boolean awaitsForRoll(){
+        if(awaitsForFirstRoll() || awaitsForLastRoll()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public boolean awaitsForLastRoll(){
+        if( (scores.size() == 1 && !isStrike()) ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean awaitsForFirstRoll(){
+        if(scores.size() == 0) {return true;}
+        else {
+            return false;
         }
     }
 
     public boolean isStrike(){
-        if(getFirstRollDownPills() == 10){
-            return true;
-        }
-        else{
+        if(scores.size() < 1){
             return false;
         }
-    }
-
-    public boolean isSecondStrike(){
-        if(isLastFrame){
-            if (getSecondRollDownPills() == 10){
-                return true;
-            }
-            else{
-                return false;
-            }
+        if(scores.get(0) == 10) {
+            return true;
         }else{
-            throw new IllegalArgumentException();
-        }
-
-    }
-
-    public boolean isThirdStrike(){
-        if(isLastFrame){
-            if (getThirdRollDownPills() == 10){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }else{
-            throw new IllegalArgumentException();
+            return false;
         }
     }
 
     public boolean isSpare(){
-            if(getFirstRollDownPills() != 10 && getSecondRollDownPills() == 10){
-                return true;
-            }else{
-                return false;
-            }
-    }
-
-    public boolean isSecondSpare(){
-        if(!isLastFrame){
-            throw new IllegalArgumentException();
+        if(!isStrike() && (getAllDownedPills().size() == 10) ) {
+            return true;
         }else{
-            if(isStrike() && getSecondRollDownPills() != 10 && getSecondRollDownPills() == 10){
-                return true;
-            }else{
-                return false;
-            }
+            return false;
         }
-
     }
 
     public boolean isSplit(){
-        if(isLastFrame){
-            throw new IllegalArgumentException();
-        }else{
-            if(firstRoll[0] == true && getSecondRollDownPills() == 10){
-                if(isSplitCombination()){
-                    return true;
-                }else return false;
+        if(downPills.get(0).contains(1)){
+            if(isSplitCombination(getLeavedPillsForFirstRoll(getDownPills().get(0)))){
+                return true;
+            }else {
+                return false;
             }
-            return false;
         }
-
+        return false;
     }
 
     public boolean isWashout(){
-        if(isLastFrame){
-            throw new IllegalArgumentException();
-        }else{
-            if(firstRoll[0] == false && getSecondRollDownPills() == 10){
-                if(isWashoutCombination()){
-                    return true;
-                }else return false;
-            }
-            return false;
-        }
-    }
-
-    public static ArrayList<Integer> getNumbersOfLeavedPills(boolean[] roll){
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < roll.length; i++) {
-            if(roll[i] == false){
-                list.add(i+1);
+        if(! downPills.get(0).contains(1)){
+            if(isWashoutCombination(getLeavedPillsForFirstRoll(getDownPills().get(0)))){
+                return true;
+            }else {
+                return false;
             }
         }
-        return list;
+        return false;
     }
 
-    public static ArrayList<Integer> getNumbersOfDownPills(boolean[] roll){
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < roll.length; i++) {
-            if(roll[i]){
-                list.add(i+1);
+    public ArrayList<Integer> getAllDownedPills(){
+        ArrayList<Integer> allList = new ArrayList<Integer>();
+        allList.addAll(getDownPills().get(0));
+        if(!awaitsForRoll() && !isStrike()){
+            allList.addAll(getDownPills().get(1));
+        }
+        return allList;
+    }
+
+
+    public static ArrayList<Integer> getLeavedPillsForFirstRoll(ArrayList<Integer> getDownedPillsForFirstRoll){
+        ArrayList<Integer> leavedPills = new ArrayList<>();
+        for (int i = 1; i < 11; i++) {
+            if(getDownedPillsForFirstRoll.contains(i)){
+                continue;
+            }else{
+                leavedPills.add(i);
             }
         }
-        return list;
+        return leavedPills;
     }
 
-    public boolean isSplitCombination(){
+    public static boolean isSplitCombination(ArrayList<Integer> leavedPillsForFirstRoll){
         return  (
-                getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(7,9)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(5,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(5,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(5,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(3,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(2,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(2,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(3,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(2,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(3,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(4,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(4,6,7,8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(4,6,7,9,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(3,4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(2,4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(2,4,6,7,8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(3,4,6,7,9,10))
+            leavedPillsForFirstRoll.equals(Arrays.asList(7,10))         ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(7,9))          ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(8,10))         ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(5,7))          ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(5,10))         ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(5,7,10))       ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(3,7))          ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(2,10))         ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(2,7))          ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(3,10))         ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(2,7,10))       ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(3,7,10))       ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(4,7,10))       ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(6,7,10))       ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(4,6,7,10))     ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(4,6,7,8,10))   ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(4,6,7,9,10))   ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(3,4,6,7,10))   ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(2,4,6,7,10))   ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(2,4,6,7,8,10)) ||
+            leavedPillsForFirstRoll.equals(Arrays.asList(3,4,6,7,9,10))
         );
     }
 
-    public boolean isWashoutCombination(){
+    public static boolean isWashoutCombination(ArrayList<Integer> leavedPillsForFirstRoll){
         return  (
-                getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,7,9)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,5,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,5,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,5,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,3,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,2,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,2,7)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,3,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,2,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,3,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,4,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,4,6,7,8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,4,6,7,9,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,3,4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,2,4,6,7,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,2,4,6,7,8,10)) ||
-                        getNumbersOfLeavedPills(firstRoll).equals(Arrays.asList(1,3,4,6,7,9,10))
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,7,10))          ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,7,9))           ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,8,10))          ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,5,7))           ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,5,10))          ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,5,7,10))        ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,3,7))           ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,2,10))          ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,2,7))           ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,3,10))          ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,2,7,10))        ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,3,7,10))        ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,4,7,10))        ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,6,7,10))        ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,4,6,7,10))      ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,4,6,7,8,10))    ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,4,6,7,9,10))    ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,3,4,6,7,10))    ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,2,4,6,7,10))    ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,2,4,6,7,8,10))  ||
+             leavedPillsForFirstRoll.equals(Arrays.asList(1,3,4,6,7,9,10))
         );
-    }
-
-    public boolean[] getFirstRoll() {
-        return firstRoll;
-    }
-
-    public void setFirstRoll(boolean[] firstRoll) {
-        this.firstRoll = firstRoll;
-    }
-
-    public boolean[] getSecondRoll() {
-        return secondRoll;
-    }
-
-    public void setSecondRoll(boolean[] secondRoll) {
-        this.secondRoll = secondRoll;
-    }
-
-    public boolean[] getThirdRoll() {
-        return thirdRoll;
-    }
-
-    public void setThirdRoll(boolean[] thirdRoll) {
-        this.thirdRoll = thirdRoll;
-    }
-
-    public Roll getRollState() {
-        return rollState;
-    }
-
-    public void setRollState(Roll rollState) {
-        this.rollState = rollState;
     }
 
 }
